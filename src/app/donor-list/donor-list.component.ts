@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import * as firebase from 'firebase';
 
 declare var google: any;
 let map: any;
@@ -11,6 +12,18 @@ const options = {
 let infowindow: any;
 const iconBase = 'http://maps.google.com/mapfiles/ms/icons/';
 
+export const snapshotToArray = (snapshot: any) => {
+  const returnArr = [];
+
+  snapshot.forEach((childSnapshot: any) => {
+      const item = childSnapshot.val();
+      item.key = childSnapshot.key;
+      returnArr.push(item);
+  });
+
+  return returnArr;
+};
+
 @Component({
   selector: 'app-donor-list',
   templateUrl: './donor-list.component.html',
@@ -20,7 +33,13 @@ export class DonorListComponent implements OnInit {
 
   @ViewChild('map', {static: false}) mapElement: ElementRef;
 
+  donors = [];
+
   constructor() {
+    firebase.database().ref('donors/').on('value', resp => {
+      this.donors = [];
+      this.donors = snapshotToArray(resp);
+    });
     this.initMap();
   }
 
