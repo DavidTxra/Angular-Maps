@@ -39,6 +39,9 @@ export class DonorListComponent implements OnInit {
     firebase.database().ref('donors/').on('value', resp => {
       this.donors = [];
       this.donors = snapshotToArray(resp);
+      for (const donor of this.donors) {
+        this.createMarkers(donor);
+      }
     });
     this.initMap();
   }
@@ -77,6 +80,21 @@ export class DonorListComponent implements OnInit {
     }, (error) => {
       console.log(error);
     }, options);
+  }
+
+  createMarkers(place: any) {
+    const latitude = parseFloat(place.coords.latitude);
+    const longitude = parseFloat(place.coords.longitude);
+    const donorMarker = new google.maps.Marker({
+      map,
+      position: { lat: latitude, lng: longitude },
+      icon: iconBase + 'green-dot.png'
+    });
+  
+    google.maps.event.addListener(donorMarker, 'click', function() {
+      infowindow.setContent('<h3>' + place.name + '</h3><p>Phone number: ' + place.phone + '<br>Email: ' + place.email + '</p>');
+      infowindow.open(map, this);
+    });
   }
 
 }
